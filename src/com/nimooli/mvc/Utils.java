@@ -9,6 +9,10 @@ import java.util.List;
 
 /**
  * Created by Nima Ghafoori on 5/9/14.
+ * Modified by Luigi Ferrari on 5 March 2021
+ *  - getElementsFromFile(String filePath)
+ *    Problems arise if the path contains spaces. 
+ *    Now we use InputStream instead. 
  */
 public class Utils {
 
@@ -29,6 +33,7 @@ public class Utils {
      * @throws java.lang.Exception        If file doesn't exist or is a directory.
      * @throws java.lang.RuntimeException If file does not contain valid configuration.
      */
+    @Deprecated
     public static Config getElementsFromFile(String filePath) throws Exception {
 
         Config config = null;
@@ -38,9 +43,9 @@ public class Utils {
         int maxLineLngth; // The first line in input file determines the maximum length of a row
         List<Element> elementsFromConfig = new ArrayList<Element>();
 
-
         try {
             file = new File(filePath);
+            
 
             if (!file.exists() || file.isDirectory()) {
                 throw new Exception("File " + filePath + " does not exist or is a directory");
@@ -96,7 +101,59 @@ public class Utils {
         return config;
     }
 
+   /**
+     * Loads a configuration file and parses its configuration.
+     * If parsing goes without error, a Config object is created
+     *
+     * @throws java.lang.RuntimeException If file does not contain valid configuration.
+     */
+    public static Config getElementsFromFile(InputStream stream) throws Exception {
+        Config config = null;
+        File file;
+        BufferedReader reader = null;
+        int maxLineLngth; // The first line in input file determines the maximum length of a row
+        List<Element> elementsFromConfig = new ArrayList<Element>();
 
+        try {
+            // Read the file character by character and parse it
+            reader = new BufferedReader(new InputStreamReader(stream));
+
+            String line = reader.readLine();
+            maxLineLngth = line.length();
+
+            if (maxLineLngth == 0) {
+                throw new Exception("File " /*+ filePath/*/ + " contains an empty row.");
+            }
+
+            while (line != null) {
+                for (char c : line.toCharArray()) {
+                    Element e;
+                    if (c == ' ') {
+                        e = getElementFromChar('e');
+                    } else {
+                        e = getElementFromChar(c);
+                    }
+                    elementsFromConfig.add(e);
+                }
+                line = reader.readLine();
+            }
+            
+            config = new Config(elementsFromConfig, maxLineLngth);
+           
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+              if (reader != null)
+                 reader.close();
+            } catch (IOException e) {
+            }
+        }
+
+        return config;
+    }
+
+   
     /**
      * @param c Character representing an element
      * @return an Element for valid c or null otherwise
