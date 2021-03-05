@@ -6,6 +6,7 @@ import com.nimooli.mvc.model.Config;
 import com.nimooli.mvc.model.DIRECTION;
 import com.nimooli.mvc.model.Mouse;
 import com.nimooli.mvc.view.BoardView;
+import java.io.InputStream;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,6 +18,9 @@ import java.net.URL;
 
 /**
  * Created by Nima Ghafoori on 5/9/14.
+ * Modified by Luigi Ferrari on 5 March 2021
+ *  - URL configFileUrl = Utils.class.getResource(path):
+ *    problems arise if the path contains spaces. 
  */
 public class MainController extends JFrame implements ActionListener,
         KeyListener {
@@ -149,10 +153,11 @@ public class MainController extends JFrame implements ActionListener,
         }
 
         // Add the board view to main panel
-        URL configFileUrl = Utils.class.getResource("levels/" + level);
+        InputStream is = Utils.class.getResourceAsStream("levels/" + level); 
+        System.out.println("InputStream "+ is.toString());
         Config config = null;
         try {
-            config = Utils.getElementsFromFile(configFileUrl.getPath());
+            config = Utils.getElementsFromFile(is);
         } catch (Exception e) {
             e.printStackTrace();
         }
